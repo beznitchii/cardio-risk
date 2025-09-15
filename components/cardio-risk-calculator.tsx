@@ -1226,7 +1226,8 @@ export default function CardioRiskCalculator({ language, onLanguageChange }: Car
               <p class="drug-therapy-}
            
             <div class="drug-therapy-box">
-              <p class="drug-therapy-title"></p>
+              <p class="drug-therapy-title">${language === "ru" ? "Медикаментозная терапия" : language === "en" ? "Drug Therapy" : language === "ro" ? "Terapie medicamentoasă" : "İlaç tedavisi"}</p>
+              <p class="drug-therapy-text">${language === "ru" ? "Рекомендуется консультация врача для назначения соответствующей медикаментозной терапии." : language === "en" ? "Consultation with a physician is recommended for appropriate drug therapy." : language === "ro" ? "Se recomandă consultarea unui medic pentru terapia medicamentoasă corespunzătoare." : "Uygun ilaç tedavisi için doktor konsültasyonu önerilir."}</p>
             </div>
             
       </div>

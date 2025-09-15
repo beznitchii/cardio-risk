@@ -5,7 +5,7 @@ import { getTranslation, type Language } from "@/lib/i18n/translations"
 
 interface GFRGaugeProps {
   gfrValue: number
-  stage: string
+  stage: { stage: string; description: string }
   language: Language
   setCanvasRef: (canvas: HTMLCanvasElement | null) => void
 }
@@ -44,7 +44,7 @@ export default function GFRGauge({ gfrValue, stage, language, setCanvasRef }: GF
       G5: "#991b1b", // Dark red
     }
 
-    const color = stageColors[stage as keyof typeof stageColors] || "#6b7280"
+    const color = stageColors[stage.stage as keyof typeof stageColors] || "#6b7280"
 
     // Draw gauge background
     const centerX = canvas.width / 2
@@ -101,7 +101,7 @@ export default function GFRGauge({ gfrValue, stage, language, setCanvasRef }: GF
     ctx.fillText("mL/min/1.73m²", centerX, centerY + 10)
 
     // Draw stage label
-    const stageName = t.gfrCalculator.stages[stage as keyof typeof t.gfrCalculator.stages] || stage
+    const stageName = t.gfrCalculator.stages[stage.stage as keyof typeof t.gfrCalculator.stages] || stage.stage
     ctx.fillStyle = color
     ctx.font = "bold 16px Arial"
     ctx.fillText(stageName, centerX, centerY + 35)
