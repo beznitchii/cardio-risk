@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import LanguageSwitcher from "./language-switcher"
 import { getTranslation, type Language } from "@/lib/i18n/translations"
+import Image from "next/image"
 
 interface MedicalProfessionalDisclaimerProps {
   onConfirm: () => void
@@ -34,10 +35,22 @@ export default function MedicalProfessionalDisclaimer({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-2xl mx-auto">
         <CardHeader className="text-center pb-4">
-          <div className="flex justify-between items-center gap-3 mb-4">
-            <div></div> {/* Empty div for spacing */}
-            <CardTitle className="text-lg sm:text-xl font-bold text-center">{t.disclaimerTitle}</CardTitle>
-            <LanguageSwitcher currentLanguage={currentLanguage} onLanguageChange={onLanguageChange} />
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+              <Image
+                src="/images/Stada_logo.png"
+                alt="STADA Logo"
+                width={80}
+                height={32}
+                className="self-start sm:self-center min-w-[80px]"
+              />
+              <CardTitle className="text-lg sm:text-xl font-bold text-left sm:text-center">
+                {t.disclaimerTitle}
+              </CardTitle>
+            </div>
+            <div className="self-start sm:self-auto">
+              <LanguageSwitcher currentLanguage={currentLanguage} onLanguageChange={onLanguageChange} />
+            </div>
           </div>
         </CardHeader>
         <CardContent className="text-center space-y-6">

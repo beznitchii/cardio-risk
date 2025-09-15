@@ -21,6 +21,7 @@ import LanguageSwitcher from "./language-switcher"
 import { getTranslation, type Language } from "@/lib/i18n/translations"
 import { Download } from "lucide-react"
 import DetailedRecommendations from "./detailed-recommendations"
+import Image from "next/image"
 
 // Объявляем типы для глобальных функций Google Analytics
 declare global {
@@ -1013,6 +1014,10 @@ export default function CardioRiskCalculator({ language, onLanguageChange }: Car
           border-bottom: 2px solid #e5e7eb;
           padding-bottom: 10px;
         }
+        .logo { 
+          height: 40px; 
+          margin-right: 15px; 
+        }
         .title-main { 
           font-size: 24px; 
           font-weight: bold; 
@@ -1140,7 +1145,10 @@ export default function CardioRiskCalculator({ language, onLanguageChange }: Car
     </head>
     <body>
       <div class="header">
-        <div class="title-main">${t.title}</div>
+        <img src="/images/stada-logo.png" alt="STADA Logo" class="logo">
+        <div>
+          <div class="title-main">${t.title}</div>
+        </div>
       </div>
 
       <div class="patient-info-and-gauge-container">
@@ -1256,6 +1264,13 @@ export default function CardioRiskCalculator({ language, onLanguageChange }: Car
       <div className="flex flex-col gap-3 mb-4">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+            <Image
+              src="/images/Stada_logo.png"
+              alt="STADA Logo"
+              width={80}
+              height={32}
+              className="self-start sm:self-auto min-w-[80px]"
+            />
             <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold leading-tight">{t.title}</h1>
           </div>
           <div className="self-start sm:self-auto">

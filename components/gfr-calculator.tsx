@@ -12,6 +12,7 @@ import { calculateGFR, convertCreatinine, type GFRParams } from "@/lib/gfr-calcu
 import GFRGauge from "./gfr-gauge"
 import LanguageSwitcher from "./language-switcher"
 import { getTranslation, type Language } from "@/lib/i18n/translations"
+import Image from "next/image"
 
 // Объявляем типы для глобальных функций Google Analytics
 declare global {
@@ -288,6 +289,10 @@ export default function GFRCalculator({ language, onLanguageChange }: GFRCalcula
               border-bottom: 2px solid #e5e7eb;
               padding-bottom: 10px;
             }
+            .logo { 
+              height: 40px; 
+              margin-right: 15px; 
+            }
             .title-main { 
               font-size: 24px; 
               font-weight: bold; 
@@ -354,6 +359,7 @@ export default function GFRCalculator({ language, onLanguageChange }: GFRCalcula
         </head>
         <body>
           <div class="header">
+            <img src="/images/stada-logo.png" alt="STADA Logo" class="logo">
             <div>
               <div class="title-main">${t.gfrCalculator.title}</div>
             </div>
@@ -443,10 +449,17 @@ export default function GFRCalculator({ language, onLanguageChange }: GFRCalcula
 
   return (
     <div className="w-full max-w-6xl mx-auto">
-      {/* Header with title, language switcher */}
+      {/* Header with logo, title, language switcher */}
       <div className="flex flex-col gap-3 mb-4">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+            <Image
+              src="/images/Stada_logo.png"
+              alt="STADA Logo"
+              width={80}
+              height={32}
+              className="self-start sm:self-auto min-w-[80px]"
+            />
             <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold leading-tight">
               {t.gfrCalculator.title}
             </h1>
