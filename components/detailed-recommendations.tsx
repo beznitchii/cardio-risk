@@ -38,7 +38,6 @@ export default function DetailedRecommendations({
           <p><strong>Ограничить:</strong></p>
           <ul>
             <li>Потребление соли до <5 г/день</li>
-            <li>Алкоголь (<100 г/неделю)</li>
             <li>Сахар и сладкие напитки</li>
             <li>Обработанные мясные продукты</li>
           </ul>
@@ -172,7 +171,6 @@ export default function DetailedRecommendations({
           <p><strong>Limit:</strong></p>
           <ul>
             <li>Salt intake to <5 g/day</li>
-            <li>Alcohol (<100 g/week)</li>
             <li>Sugar and sweetened beverages</li>
             <li>Processed meat products</li>
           </ul>
@@ -306,7 +304,6 @@ export default function DetailedRecommendations({
           <p><strong>Limitați:</strong></p>
           <ul>
             <li>Consumul de sare la <5 g/zi</li>
-            <li>Alcoolul (<100 g/săptămână)</li>
             <li>Zahărul și băuturile îndulcite</li>
             <li>Produsele din carne procesată</li>
           </ul>
@@ -440,7 +437,6 @@ export default function DetailedRecommendations({
           <p><strong>Sınırlamak:</strong></p>
           <ul>
             <li>Tuz tüketimini günde <5 g'a</li>
-            <li>Alkol (haftada <100 g)</li>
             <li>Şeker ve tatlı içecekler</li>
             <li>İşlenmiş et ürünleri</li>
           </ul>

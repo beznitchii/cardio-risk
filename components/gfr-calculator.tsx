@@ -5,8 +5,8 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Download } from "lucide-react"
 import GFRGauge from "./gfr-gauge"
 import { calculateGFR, type GFRParams } from "@/lib/gfr-calculator"
 import { getTranslation, type Language } from "@/lib/i18n/translations"
@@ -22,13 +22,14 @@ export default function GFRCalculator({ language, onLanguageChange }: GFRCalcula
 
   const [formData, setFormData] = useState({
     age: "",
-    gender: "",
+    gender: "male",
     creatinine: "",
     unit: "umoll" as "mgdl" | "umoll",
   })
 
   const [result, setResult] = useState<any>(null)
   const [isCalculating, setIsCalculating] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
   const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null)
 
   // Auto-calculate age from birth year
@@ -119,46 +120,264 @@ export default function GFRCalculator({ language, onLanguageChange }: GFRCalcula
     }
   }
 
-  const handleExportPDF = async () => {
-    if (!result) return
+  const handleExportPDF = () => {
+    if (!result || !canvasRef) {
+      alert(
+        language === "ru"
+          ? "Недостаточно данных для экспорта"
+          : language === "en"
+            ? "Insufficient data for export"
+            : language === "ro"
+              ? "Date insuficiente pentru export"
+              : "Eksport için yetersiz veri",
+      )
+      return
+    }
+
+    const startTime = performance.now()
+
+    // Track PDF export start
+    if (typeof window !== "undefined" && window.gtag) {
+      window.gtag("event", "pdf_export_gfr_started", {
+        event_category: "gfr_calculator",
+        event_label: `gfr_${result.stage.stage}`,
+        gfr_value: result.gfr,
+        gfr_stage: result.stage.stage,
+        anonymized: true,
+      })
+    }
+
+    setIsExporting(true)
 
     try {
-      // Track PDF export start with specific GFR event
-      if (typeof window !== "undefined" && window.gtag) {
-        window.gtag("event", "pdf_export_gfr_started", {
-          event_category: "gfr_calculator",
-          event_label: `gfr_${result.stage.stage}`,
-          gfr_value: result.gfr,
-          gfr_stage: result.stage.stage,
-          anonymized: true,
-        })
+      const printWindow = window.open("", "_blank")
+      if (!printWindow) {
+        alert(
+          language === "ru"
+            ? "Пожалуйста, разрешите всплывающие окна для этого сайта."
+            : language === "en"
+              ? "Please allow pop-ups for this site."
+              : language === "ro"
+                ? "Vă rugăm să permiteți ferestrele pop-up pentru acest site."
+                : "Bu site için açılır pencerelere izin verin.",
+        )
+        setIsExporting(false)
+        return
       }
 
-      // Simple print functionality for now
-      window.print()
+      const gaugeImageData = canvasRef.toDataURL("image/png")
+      const stageName = t.gfrCalculator.stages[result.stage.stage as keyof typeof t.gfrCalculator.stages] || ""
+      const interpretation =
+        t.gfrCalculator.interpretations[result.stage.stage as keyof typeof t.gfrCalculator.interpretations] || ""
 
-      // Track successful PDF export with specific GFR event
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${t.gfrCalculator.title}</title>
+          <meta charset="utf-8">
+          <style>
+            body { 
+              font-family: Arial, sans-serif; 
+              font-size: 14px; 
+              line-height: 1.3;
+              margin: 15px;
+              color: #1f2937;
+            }
+            .header { 
+              display: flex; 
+              align-items: center; 
+              margin-bottom: 15px; 
+              border-bottom: 2px solid #e5e7eb;
+              padding-bottom: 10px;
+            }
+            .title-main { 
+              font-size: 24px; 
+              font-weight: bold; 
+              color: #1f2937;
+              margin-bottom: 2px;
+            }
+            .section-title { 
+              font-size: 18px; 
+              font-weight: bold; 
+              margin-top: 15px; 
+              margin-bottom: 8px; 
+              color: #1f2937;
+              border-bottom: 1px solid #e5e7eb;
+              padding-bottom: 3px;
+            }
+            .patient-info-and-gauge-container {
+                overflow: hidden;
+                margin-bottom: 15px;
+            }
+            .patient-data-block {
+                float: left;
+                width: calc(100% - 300px);
+            }
+            .gauge-container-pdf {
+                float: right;
+                width: 282px;
+                margin-left: 15px;
+            }
+            .gauge-image-pdf {
+                width: 100%;
+                height: auto;
+            }
+            p { 
+              margin: 3px 0; 
+            }
+            .footer { 
+              margin-top: 20px; 
+              font-size: 12px; 
+              text-align: center; 
+              border-top: 1px solid #ccc; 
+              padding-top: 8px; 
+              color: #6b7280;
+            }
+            .recommendations-section {
+              margin-top: 15px;
+            }
+            .recommendation-item {
+              margin-bottom: 10px;
+              padding: 8px;
+              background-color: #eff6ff;
+              border: 1px solid #bfdbfe;
+              border-radius: 4px;
+            }
+            .recommendation-text {
+              font-size: 14px;
+              line-height: 1.4;
+              white-space: pre-line;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <div class="title-main">${t.gfrCalculator.title}</div>
+            </div>
+          </div>
+
+          <div class="patient-info-and-gauge-container">
+              <div class="patient-data-block">
+                  <div class="section-title">${
+                    language === "ru"
+                      ? "Данные пациента"
+                      : language === "en"
+                        ? "Patient Data"
+                        : language === "ro"
+                          ? "Date pacient"
+                          : "Hasta verileri"
+                  }</div>
+                  <p><strong>${t.gfrCalculator.age}:</strong> ${formData.age}</p>
+                  <p><strong>${t.gfrCalculator.gender}:</strong> ${
+                    formData.gender === "male" ? t.gfrCalculator.male : t.gfrCalculator.female
+                  }</p>
+                  <p><strong>${t.gfrCalculator.creatinine}:</strong> ${formData.creatinine} ${
+                    formData.unit === "umoll" ? t.gfrCalculator.umoll : t.gfrCalculator.mgdl
+                  }</p>
+              </div>
+              <div class="gauge-container-pdf">
+                   <img src="${gaugeImageData}" alt="GFR Gauge" class="gauge-image-pdf">
+              </div>
+          </div>
+          <div style="clear: both;"></div>
+
+          <div class="section-title">${
+            language === "ru"
+              ? "Результаты"
+              : language === "en"
+                ? "Results"
+                : language === "ro"
+                  ? "Rezultate"
+                  : "Sonuçlar"
+          }</div>
+          <div class="results-text-content">
+              <p style="font-weight: bold; font-size: 16px;">
+                <strong>${t.gfrCalculator.gfrValue}:</strong> ${result.gfr} mL/min/1.73m²
+              </p>
+              <p style="font-weight: bold; font-size: 16px; margin-top: 8px;">
+                <strong>${t.gfrCalculator.ckdStage}:</strong> ${stageName}
+              </p>
+              <p style="margin-top: 5px; color: #6b7280;">
+                <strong>${t.gfrCalculator.interpretation}:</strong> ${interpretation}
+              </p>
+              <p style="font-size: 12px; color: #6b7280; margin-top: 8px;">
+                ${t.gfrCalculator.calculationMethod}
+              </p>
+          </div>
+
+          <div class="recommendations-section">
+            <div class="section-title">${t.gfrCalculator.recommendations}</div>
+            ${result.recommendations
+              .map(
+                (recKey: string) => `
+              <div class="recommendation-item">
+                <div class="recommendation-text">${
+                  t.gfrCalculator.recommendationTexts[recKey as keyof typeof t.gfrCalculator.recommendationTexts]
+                }</div>
+              </div>
+            `,
+              )
+              .join("")}
+          </div>
+
+          <div class="footer">
+            ${new Date().toLocaleDateString(
+              language === "ru" ? "ru-RU" : language === "ro" ? "ro-RO" : language === "gag" ? "tr-TR" : "en-US",
+            )}
+          </div>
+
+          <script>
+            setTimeout(() => {
+              window.print();
+            }, 1000);
+          </script>
+        </body>
+        </html>
+      `)
+
+      // Track successful PDF export
       if (typeof window !== "undefined" && window.gtag) {
+        const exportTime = performance.now() - startTime
+
         window.gtag("event", "pdf_export_gfr_completed", {
           event_category: "gfr_calculator",
-          event_label: `gfr_${result.stage.stage}`,
+          event_label: `gfr_${result.stage.stage}_success`,
           gfr_value: result.gfr,
           gfr_stage: result.stage.stage,
+          language: language,
+          export_time_ms: Math.round(exportTime),
           anonymized: true,
+          value: 1,
         })
       }
-    } catch (error) {
-      console.error("PDF export error:", error)
 
+      printWindow.document.close()
+    } catch (error) {
       // Track PDF export error
       if (typeof window !== "undefined" && window.gtag) {
         window.gtag("event", "pdf_export_gfr_error", {
           event_category: "gfr_calculator",
           event_label: "pdf_export_failed",
-          error: error instanceof Error ? error.message : "Unknown error",
+          error: error instanceof Error ? error.message : "unknown_error",
+          gfr_stage: result.stage.stage,
+          language: language,
           anonymized: true,
         })
       }
+      console.error("Error generating GFR PDF:", error)
+      alert(
+        language === "ru"
+          ? "Ошибка при создании PDF."
+          : language === "en"
+            ? "Error creating PDF."
+            : language === "ro"
+              ? "Eroare la crearea PDF-ului."
+              : "PDF oluşturma hatası.",
+      )
+    } finally {
+      setIsExporting(false)
     }
   }
 
@@ -224,34 +443,41 @@ export default function GFRCalculator({ language, onLanguageChange }: GFRCalcula
                 </div>
               </div>
 
-              {/* Creatinine and Units */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="creatinine">{t.gfrCalculator.creatinine}</Label>
-                  <Input
-                    id="creatinine"
-                    type="number"
-                    step="0.01"
-                    value={formData.creatinine}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, creatinine: e.target.value }))}
-                    required
-                  />
-                </div>
+              {/* Creatinine input only */}
+              <div className="space-y-2">
+                <Label htmlFor="creatinine">{t.gfrCalculator.creatinine}</Label>
+                <Input
+                  id="creatinine"
+                  type="number"
+                  step="0.01"
+                  value={formData.creatinine}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, creatinine: e.target.value }))}
+                  required
+                />
+              </div>
 
-                <div className="space-y-2">
-                  <Label>{t.gfrCalculator.units}</Label>
-                  <Select
-                    value={formData.unit}
-                    onValueChange={(value: "mgdl" | "umoll") => setFormData((prev) => ({ ...prev, unit: value }))}
+              {/* Units selection with button style */}
+              <div className="space-y-2">
+                <Label>{t.gfrCalculator.units}</Label>
+                <div className="grid grid-cols-2 gap-1 border rounded-md overflow-hidden">
+                  <button
+                    type="button"
+                    className={`py-2 px-2 text-sm font-medium transition-colors ${
+                      formData.unit === "umoll" ? "bg-blue-600 text-white" : "bg-background hover:bg-gray-50"
+                    }`}
+                    onClick={() => setFormData({ ...formData, unit: "umoll" })}
                   >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="umoll">{t.gfrCalculator.umoll}</SelectItem>
-                      <SelectItem value="mgdl">{t.gfrCalculator.mgdl}</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    {t.gfrCalculator.umoll}
+                  </button>
+                  <button
+                    type="button"
+                    className={`py-2 px-2 text-sm font-medium transition-colors ${
+                      formData.unit === "mgdl" ? "bg-blue-600 text-white" : "bg-background hover:bg-gray-50"
+                    }`}
+                    onClick={() => setFormData({ ...formData, unit: "mgdl" })}
+                  >
+                    {t.gfrCalculator.mgdl}
+                  </button>
                 </div>
               </div>
 
@@ -298,14 +524,26 @@ export default function GFRCalculator({ language, onLanguageChange }: GFRCalcula
                       <p className="text-lg font-semibold">
                         {t.gfrCalculator.stages[result.stage.stage as keyof typeof t.gfrCalculator.stages]}
                       </p>
-                      <p className="text-sm text-gray-600 mt-1">{result.stage.description}</p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {
+                          t.gfrCalculator.interpretations[
+                            result.stage.stage as keyof typeof t.gfrCalculator.interpretations
+                          ]
+                        }
+                      </p>
                     </CardContent>
                   </Card>
                 </div>
 
                 <div className="flex justify-center pt-4 border-t">
-                  <Button onClick={handleExportPDF} variant="outline" className="bg-transparent">
-                    {t.gfrCalculator.exportPDF}
+                  <Button
+                    onClick={handleExportPDF}
+                    variant="outline"
+                    className="bg-transparent flex items-center gap-1"
+                    disabled={isExporting}
+                  >
+                    <Download className="h-4 w-4" />
+                    {isExporting ? (language === "ru" ? "Создание..." : "Generating...") : t.gfrCalculator.exportPDF}
                   </Button>
                 </div>
               </div>
@@ -328,9 +566,11 @@ export default function GFRCalculator({ language, onLanguageChange }: GFRCalcula
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {result.recommendations.map((rec: string, index: number) => (
+              {result.recommendations.map((recKey: string, index: number) => (
                 <div key={index} className="p-4 bg-blue-50 rounded-lg">
-                  <p>{rec}</p>
+                  <div className="whitespace-pre-line">
+                    {t.gfrCalculator.recommendationTexts[recKey as keyof typeof t.gfrCalculator.recommendationTexts]}
+                  </div>
                 </div>
               ))}
             </div>

@@ -55,7 +55,7 @@ export function calculateGFR(params: GFRParams): GFRResult {
   // Determine stage and recommendations
   const stage = getGFRStage(roundedGfr)
   const interpretation = getGFRInterpretation(roundedGfr, stage.stage)
-  const recommendations = getGFRRecommendations(stage.stage, "en")
+  const recommendations = getGFRRecommendations(stage.stage)
 
   return {
     gfr: roundedGfr,
@@ -87,7 +87,7 @@ function getGFRInterpretation(gfr: number, stage: string): string {
   return interpretations[stage as keyof typeof interpretations] || ""
 }
 
-export function getGFRRecommendations(stage: string, language = "en"): string[] {
+export function getGFRRecommendations(stage: string): string[] {
   const recommendations = {
     G1: ["lifestyle", "monitoring"],
     G2: ["lifestyle", "monitoring", "riskFactors"],
@@ -97,49 +97,5 @@ export function getGFRRecommendations(stage: string, language = "en"): string[] 
     G5: ["specialist", "replacement"],
   }
 
-  const stageRecs = recommendations[stage as keyof typeof recommendations] || []
-
-  // Return translated recommendations based on language
-  const translations = {
-    en: {
-      lifestyle: "Maintain healthy lifestyle with balanced diet and regular exercise",
-      monitoring: "Regular monitoring of kidney function and blood pressure",
-      riskFactors: "Control diabetes, hypertension, and other cardiovascular risk factors",
-      specialist: "Consult with nephrologist for specialized care",
-      complications: "Monitor and treat complications of chronic kidney disease",
-      preparation: "Prepare for renal replacement therapy",
-      replacement: "Consider dialysis or kidney transplantation",
-    },
-    ru: {
-      lifestyle: "Поддерживайте здоровый образ жизни со сбалансированной диетой и регулярными упражнениями",
-      monitoring: "Регулярный мониторинг функции почек и артериального давления",
-      riskFactors: "Контролируйте диабет, гипертонию и другие сердечно-сосудистые факторы риска",
-      specialist: "Консультация с нефрологом для специализированной помощи",
-      complications: "Мониторинг и лечение осложнений хронической болезни почек",
-      preparation: "Подготовка к заместительной почечной терапии",
-      replacement: "Рассмотрите диализ или трансплантацию почки",
-    },
-    ro: {
-      lifestyle: "Mențineți un stil de viață sănătos cu dietă echilibrată și exerciții regulate",
-      monitoring: "Monitorizarea regulată a funcției renale și a tensiunii arteriale",
-      riskFactors: "Controlați diabetul, hipertensiunea și alți factori de risc cardiovascular",
-      specialist: "Consultați cu nefrologul pentru îngrijire specializată",
-      complications: "Monitorizați și tratați complicațiile bolii cronice de rinichi",
-      preparation: "Pregătiți-vă pentru terapia de înlocuire renală",
-      replacement: "Luați în considerare dializa sau transplantul de rinichi",
-    },
-    gag: {
-      lifestyle: "Dengeli diyet ve düzenli egzersiz ile sağlıklı yaşam tarzını koruyun",
-      monitoring: "Böbrek fonksiyonu ve kan basıncının düzenli izlenmesi",
-      riskFactors: "Diyabet, hipertansiyon ve diğer kardiyovasküler risk faktörlerini kontrol edin",
-      specialist: "Uzman bakım için nefroloğa danışın",
-      complications: "Kronik böbrek hastalığının komplikasyonlarını izleyin ve tedavi edin",
-      preparation: "Böbrek replasman tedavisine hazırlanın",
-      replacement: "Diyaliz veya böbrek nakli düşünün",
-    },
-  }
-
-  const langTranslations = translations[language as keyof typeof translations] || translations.en
-
-  return stageRecs.map((rec) => langTranslations[rec as keyof typeof langTranslations] || rec)
+  return recommendations[stage as keyof typeof recommendations] || []
 }

@@ -455,7 +455,6 @@ export default function CardioRiskCalculator({ language, onLanguageChange }: Car
             <p><strong>Ограничить:</strong></p>
             <ul>
               <li>Потребление соли до &lt;5 г/день</li>
-              <li>Алкоголь (&lt;100 г/неделю)</li>
               <li>Сахар и сладкие напитки</li>
               <li>Обработанные мясные продукты</li>
             </ul>
@@ -589,7 +588,6 @@ export default function CardioRiskCalculator({ language, onLanguageChange }: Car
             <p><strong>Limit:</strong></p>
             <ul>
               <li>Salt intake to &lt;5 g/day</li>
-              <li>Alcohol (&lt;100 g/week)</li>
               <li>Sugar and sweetened beverages</li>
               <li>Processed meat products</li>
             </ul>
@@ -723,7 +721,6 @@ export default function CardioRiskCalculator({ language, onLanguageChange }: Car
             <p><strong>Limitați:</strong></p>
             <ul>
               <li>Consumul de sare la &lt;5 g/zi</li>
-              <li>Alcoolul (&lt;100 g/săptămână)</li>
               <li>Zahărul și băuturile îndulcite</li>
               <li>Produsele din carne procesată</li>
             </ul>
@@ -850,11 +847,13 @@ export default function CardioRiskCalculator({ language, onLanguageChange }: Car
               <li>Meyva (günde ≥200 g, 2-3 porsiyon) ve sebze (günde ≥200 g, 2-3 porsiyon) tüketimini artırmak</li>
               <li>Haftada 1-2 kere balık tüketmek, özellikle yağlı balık</li>
               <li>Kırmızı et tüketimini haftada 350-500 g'a sınırlamak</li>
+              <li>Düşük yağlı süt ürünleri seçmek</li>
+              <li>Tam tahıllı ürünler kullanmak</li>
+              <li>Doymuş yağları (tereyağı, yağlı et) doymamış yağlarla (zeytinyağı, kuruyemiş) değiştirmek</li>
             </ul>
             <p><strong>Sınırlamak:</strong></p>
             <ul>
               <li>Tuz tüketimini günde &lt;5 g'a</li>
-              <li>Alkol (haftada &lt;100 g)</li>
               <li>Şeker ve tatlı içecekler</li>
               <li>İşlenmiş et ürünleri</li>
             </ul>
@@ -1223,11 +1222,7 @@ export default function CardioRiskCalculator({ language, onLanguageChange }: Car
           ${results.ldlReduction && results.ldlReduction > 0 ? `<p><strong>${t.reductionRequired}:</strong> ${results.ldlReduction}%</p>` : ""}
            
             <div class="drug-therapy-box">
-              <p class="drug-therapy-}
-           
-            <div class="drug-therapy-box">
-              <p class="drug-therapy-title">${language === "ru" ? "Медикаментозная терапия" : language === "en" ? "Drug Therapy" : language === "ro" ? "Terapie medicamentoasă" : "İlaç tedavisi"}</p>
-              <p class="drug-therapy-text">${language === "ru" ? "Рекомендуется консультация врача для назначения соответствующей медикаментозной терапии." : language === "en" ? "Consultation with a physician is recommended for appropriate drug therapy." : language === "ro" ? "Se recomandă consultarea unui medic pentru terapia medicamentoasă corespunzătoare." : "Uygun ilaç tedavisi için doktor konsültasyonu önerilir."}</p>
+              <p class="drug-therapy-text">&nbsp;</p>
             </div>
             
       </div>
