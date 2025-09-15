@@ -376,16 +376,16 @@ export default function AnalyticsDebugEnhanced() {
           <TabsContent value="tests">
             <div className="space-y-4 py-2">
               <div className="grid grid-cols-2 gap-2">
-                <Button onClick={testEvent} size="sm" variant="outline" className="w-full">
+                <Button onClick={testEvent} size="sm" variant="outline" className="w-full bg-transparent">
                   Тест События
                 </Button>
-                <Button onClick={testPageView} size="sm" variant="outline" className="w-full">
+                <Button onClick={testPageView} size="sm" variant="outline" className="w-full bg-transparent">
                   Тест Просмотра
                 </Button>
-                <Button onClick={checkMeasurementId} size="sm" variant="outline" className="w-full">
+                <Button onClick={checkMeasurementId} size="sm" variant="outline" className="w-full bg-transparent">
                   Проверить ID
                 </Button>
-                <Button onClick={checkGACookies} size="sm" variant="outline" className="w-full">
+                <Button onClick={checkGACookies} size="sm" variant="outline" className="w-full bg-transparent">
                   Проверить Cookies
                 </Button>
               </div>

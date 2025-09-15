@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import LanguageSwitcher from "./language-switcher"
 import { getTranslation, type Language } from "@/lib/i18n/translations"
-import Image from "next/image"
 
 interface MedicalProfessionalDisclaimerProps {
   onConfirm: () => void
@@ -37,13 +36,6 @@ export default function MedicalProfessionalDisclaimer({
         <CardHeader className="text-center pb-4">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-              <Image
-                src="/images/Stada_logo.png"
-                alt="STADA Logo"
-                width={80}
-                height={32}
-                className="self-start sm:self-center min-w-[80px]"
-              />
               <CardTitle className="text-lg sm:text-xl font-bold text-left sm:text-center">
                 {t.disclaimerTitle}
               </CardTitle>

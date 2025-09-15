@@ -21,7 +21,6 @@ import LanguageSwitcher from "./language-switcher"
 import { getTranslation, type Language } from "@/lib/i18n/translations"
 import { Download } from "lucide-react"
 import DetailedRecommendations from "./detailed-recommendations"
-import Image from "next/image"
 
 // Объявляем типы для глобальных функций Google Analytics
 declare global {
@@ -47,6 +46,25 @@ declare global {
 interface CardioRiskCalculatorProps {
   language: Language
   onLanguageChange: (language: Language) => void
+}
+
+// Функция для расчета возраста из года рождения
+const calculateAgeFromBirthYear = (input: string): string => {
+  const numericInput = Number.parseInt(input)
+
+  // Если введено число больше текущего года или меньше 1900, считаем это возрастом
+  const currentYear = new Date().getFullYear()
+  if (numericInput > currentYear || numericInput < 1900) {
+    return input
+  }
+
+  // Если введено число от 1900 до текущего года, считаем это годом рождения
+  if (numericInput >= 1900 && numericInput <= currentYear) {
+    const age = currentYear - numericInput
+    return age.toString()
+  }
+
+  return input
 }
 
 export default function CardioRiskCalculator({ language, onLanguageChange }: CardioRiskCalculatorProps) {
@@ -181,7 +199,28 @@ export default function CardioRiskCalculator({ language, onLanguageChange }: Car
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setFormData({ ...formData, [name]: value })
+
+    // Специальная обработка для поля возраста
+    if (name === "age") {
+      const processedAge = calculateAgeFromBirthYear(value)
+      setFormData({ ...formData, [name]: processedAge })
+
+      // Отслеживаем использование автоматического расчета возраста
+      if (processedAge !== value && value.length >= 4) {
+        if (typeof window !== "undefined" && window.gtag) {
+          window.gtag("event", "age_auto_calculation", {
+            event_category: "cardiovascular_calculator",
+            event_label: "birth_year_to_age",
+            calculator_type: "cardiovascular_risk",
+            birth_year: Number.parseInt(value),
+            calculated_age: Number.parseInt(processedAge),
+            anonymized: true,
+          })
+        }
+      }
+    } else {
+      setFormData({ ...formData, [name]: value })
+    }
 
     // Отслеживаем взаимодействие с формой (анонимно)
     if (typeof window !== "undefined" && window.gtag) {
@@ -1014,10 +1053,6 @@ export default function CardioRiskCalculator({ language, onLanguageChange }: Car
           border-bottom: 2px solid #e5e7eb;
           padding-bottom: 10px;
         }
-        .logo { 
-          height: 40px; 
-          margin-right: 15px; 
-        }
         .title-main { 
           font-size: 24px; 
           font-weight: bold; 
@@ -1145,7 +1180,6 @@ export default function CardioRiskCalculator({ language, onLanguageChange }: Car
     </head>
     <body>
       <div class="header">
-        <img src="/images/stada-logo.png" alt="STADA Logo" class="logo">
         <div>
           <div class="title-main">${t.title}</div>
         </div>
@@ -1187,6 +1221,9 @@ export default function CardioRiskCalculator({ language, onLanguageChange }: Car
           ${calculationMethodText ? `<p style="font-size: 12px; color: #6b7280; margin-top: 3px;">${calculationMethodText}</p>` : ""}
           <p style="margin-top: 8px;"><strong>${t.targetLDL}:</strong> ≤ ${results.targetLDL?.toFixed(1)} ${t.mmolL}</p>
           ${results.ldlReduction && results.ldlReduction > 0 ? `<p><strong>${t.reductionRequired}:</strong> ${results.ldlReduction}%</p>` : ""}
+           
+            <div class="drug-therapy-box">
+              <p class="drug-therapy-}
            
             <div class="drug-therapy-box">
               <p class="drug-therapy-title"></p>
@@ -1260,17 +1297,10 @@ export default function CardioRiskCalculator({ language, onLanguageChange }: Car
 
   return (
     <div className="w-full max-w-6xl mx-auto">
-      {/* Header with logo, title, language switcher */}
+      {/* Header with title, language switcher */}
       <div className="flex flex-col gap-3 mb-4">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-            <Image
-              src="/images/Stada_logo.png"
-              alt="STADA Logo"
-              width={80}
-              height={32}
-              className="self-start sm:self-auto min-w-[80px]"
-            />
             <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold leading-tight">{t.title}</h1>
           </div>
           <div className="self-start sm:self-auto">

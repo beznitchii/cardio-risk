@@ -12,7 +12,6 @@ import { calculateGFR, convertCreatinine, type GFRParams } from "@/lib/gfr-calcu
 import GFRGauge from "./gfr-gauge"
 import LanguageSwitcher from "./language-switcher"
 import { getTranslation, type Language } from "@/lib/i18n/translations"
-import Image from "next/image"
 
 // Объявляем типы для глобальных функций Google Analytics
 declare global {
@@ -25,6 +24,25 @@ declare global {
 interface GFRCalculatorProps {
   language: Language
   onLanguageChange: (language: Language) => void
+}
+
+// Функция для расчета возраста из года рождения
+const calculateAgeFromBirthYear = (input: string): string => {
+  const numericInput = Number.parseInt(input)
+
+  // Если введено число больше текущего года или меньше 1900, считаем это возрастом
+  const currentYear = new Date().getFullYear()
+  if (numericInput > currentYear || numericInput < 1900) {
+    return input
+  }
+
+  // Если введено число от 1900 до текущего года, считаем это годом рождения
+  if (numericInput >= 1900 && numericInput <= currentYear) {
+    const age = currentYear - numericInput
+    return age.toString()
+  }
+
+  return input
 }
 
 export default function GFRCalculator({ language, onLanguageChange }: GFRCalculatorProps) {
@@ -111,7 +129,28 @@ export default function GFRCalculator({ language, onLanguageChange }: GFRCalcula
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+
+    // Специальная обработка для поля возраста
+    if (name === "age") {
+      const processedAge = calculateAgeFromBirthYear(value)
+      setFormData((prev) => ({ ...prev, [name]: processedAge }))
+
+      // Отслеживаем использование автоматического расчета возраста
+      if (processedAge !== value && value.length >= 4) {
+        if (typeof window !== "undefined" && window.gtag) {
+          window.gtag("event", "age_auto_calculation", {
+            event_category: "gfr_calculator",
+            event_label: "birth_year_to_age",
+            calculator_type: "gfr_ckd_epi",
+            birth_year: Number.parseInt(value),
+            calculated_age: Number.parseInt(processedAge),
+            anonymized: true,
+          })
+        }
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }))
+    }
 
     // Отслеживаем взаимодействие с формой GFR калькулятора
     if (typeof window !== "undefined" && window.gtag) {
@@ -218,7 +257,7 @@ export default function GFRCalculator({ language, onLanguageChange }: GFRCalcula
 
     // Отслеживаем начало экспорта PDF для GFR
     if (typeof window !== "undefined" && window.gtag) {
-      window.gtag("event", "pdf_export_GFR_started", {
+      window.gtag("event", "pdf_export_gfr_started", {
         event_category: "gfr_calculator",
         event_label: `${result.stage}_stage_pdf`,
         calculator_type: "gfr_ckd_epi",
@@ -289,10 +328,6 @@ export default function GFRCalculator({ language, onLanguageChange }: GFRCalcula
               border-bottom: 2px solid #e5e7eb;
               padding-bottom: 10px;
             }
-            .logo { 
-              height: 40px; 
-              margin-right: 15px; 
-            }
             .title-main { 
               font-size: 24px; 
               font-weight: bold; 
@@ -359,7 +394,6 @@ export default function GFRCalculator({ language, onLanguageChange }: GFRCalcula
         </head>
         <body>
           <div class="header">
-            <img src="/images/stada-logo.png" alt="STADA Logo" class="logo">
             <div>
               <div class="title-main">${t.gfrCalculator.title}</div>
             </div>
@@ -413,7 +447,7 @@ export default function GFRCalculator({ language, onLanguageChange }: GFRCalcula
       if (typeof window !== "undefined" && window.gtag && result) {
         const exportTime = performance.now() - startTime
 
-        window.gtag("event", "pdf_export_GFR_completed", {
+        window.gtag("event", "pdf_export_gfr_completed", {
           event_category: "gfr_calculator",
           event_label: `${result.stage}_stage_pdf_success`,
           calculator_type: "gfr_ckd_epi",
@@ -422,6 +456,8 @@ export default function GFRCalculator({ language, onLanguageChange }: GFRCalcula
           language: language,
           export_time_ms: Math.round(exportTime),
           anonymized: true,
+          gdpr_compliant: true,
+          medical_context: true,
           value: 1, // Успешный экспорт
         })
 
@@ -430,7 +466,7 @@ export default function GFRCalculator({ language, onLanguageChange }: GFRCalcula
     } catch (error) {
       // Отслеживаем ошибки экспорта PDF для GFR
       if (typeof window !== "undefined" && window.gtag) {
-        window.gtag("event", "pdf_export_GFR_error", {
+        window.gtag("event", "pdf_export_gfr_error", {
           event_category: "gfr_calculator",
           event_label: "pdf_export_failed",
           calculator_type: "gfr_ckd_epi",
@@ -438,6 +474,8 @@ export default function GFRCalculator({ language, onLanguageChange }: GFRCalcula
           ckd_stage: result?.stage || "unknown",
           language: language,
           anonymized: true,
+          gdpr_compliant: true,
+          medical_context: true,
         })
       }
       console.error("Error generating GFR PDF:", error)
@@ -449,17 +487,10 @@ export default function GFRCalculator({ language, onLanguageChange }: GFRCalcula
 
   return (
     <div className="w-full max-w-6xl mx-auto">
-      {/* Header with logo, title, language switcher */}
+      {/* Header with title, language switcher */}
       <div className="flex flex-col gap-3 mb-4">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-            <Image
-              src="/images/Stada_logo.png"
-              alt="STADA Logo"
-              width={80}
-              height={32}
-              className="self-start sm:self-auto min-w-[80px]"
-            />
             <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold leading-tight">
               {t.gfrCalculator.title}
             </h1>
