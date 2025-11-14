@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter, Montserrat } from "next/font/google"
+import { Inter, Montserrat } from 'next/font/google'
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { CodeProtection } from "@/components/code-protection"
@@ -23,10 +23,10 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Расчет сердечно-сосудистого риска | SCORE2",
   description: "Оцените ваш 10-летний риск сердечно-сосудистых заболеваний по системе SCORE2 и SCORE2-OP",
+  generator: "Parallax System (CEO Beznitskii Alexandr)",
   icons: {
     icon: "/favicon.ico",
   },
-    generator: 'v0.app'
 }
 
 export default function RootLayout({
